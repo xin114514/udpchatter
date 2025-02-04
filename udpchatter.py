@@ -3,6 +3,18 @@ import threading
 import time
 
 
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception as e:
+        print(f"Error getting local IP: {e}")
+        return None
+
+
 class GroupChat:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -141,12 +153,15 @@ class GroupChat:
 
 
 def main():
+    local_ip = get_local_ip()
+    if local_ip:
+        print(f"Your IP address is: {local_ip}")
     chat = GroupChat()
     threading.Thread(target=chat.receive_message).start()
     threading.Thread(target=chat.handle_new_member).start()
 
     while True:
-        action = input("Enter 'join' to join a group, 'send' to send a message, or 'exit' to quit: ")
+        action = input("Enter 'join' to join a group,'send' to send a message, or 'exit' to quit: ")
         if action.lower() == 'join':
             target_ip = input("Enter the IP address of a group member: ")
             chat.connect_to_group(target_ip)
@@ -162,5 +177,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
